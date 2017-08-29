@@ -19,7 +19,7 @@
   },
   "autoload": {
     "psr-4": {
-      "FFan\\Std\\Console\\" : "src"
+      "FFan\\Std\\Logger\\" : "src"
     }
   },
   "minimum-stability": "dev",
