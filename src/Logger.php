@@ -82,17 +82,12 @@ class Logger
     private $log_file_suffix = 'log';
 
     /**
-     * @var int 运行环境标志
-     */
-    private $env_flag;
-
-    /**
      * constructor.
      * @param string $path 目录
      * @param string $file_name 文件名
-     * @param int $env
+     * @param int $log_level
      */
-    public function __construct($path, $file_name, $env = null)
+    public function __construct($path, $file_name, $log_level = null)
     {
         $this->file_name = $file_name;
         $this->log_path = Utils::fixWithRuntimePath($path);
@@ -104,23 +99,21 @@ class Logger
         if (!$this->is_disable && !is_writeable($this->log_path)) {
             $this->is_disable = true;
         }
-        //默认日志级别
-        $this->log_level = LogLevel::EMERGENCY | LogLevel::ALERT | LogLevel::CRITICAL | LogLevel::ERROR | LogLevel::WARNING | LogLevel::NOTICE;
-        if (null === $env) {
-            $env = Env::DEV;
+        //如果没有设置日志级别,全开
+        if (null === $log_level) {
+            $log_level = 0xffff;
         }
-        $this->env_flag = $env;
-        //不是生产环境，把info 打开
-        if ($env !== Env::PRODUCT) {
-            $this->log_level |= LogLevel::INFO;
+        //error以上的日志不允许关闭
+        else {
+            $log_level |= LogLevel::ERROR | LogLevel::CRITICAL | LogLevel::ALERT | LogLevel::EMERGENCY;
         }
-        //开发环境 把debug打开
-        if ($env === Env::DEV) {
-            $this->log_level |= LogLevel::DEBUG;
-            //开发环境 不分割日志
-            $this->split_format = null;
-        } else {
+        $this->log_level = $log_level;
+        //不是开发环境,日志合并写
+        if (!$log_level === Env::DEV) {
             $this->is_write_buffer = true;
+        } else {
+            //开发环境,日志不切割
+            $this->split_format = null;
         }
     }
 
@@ -217,12 +210,7 @@ class Logger
         }
         //日志开始
         if ($this->log_request_header) {
-            $eol_str = PHP_EOL;
-            //是否生产环境
-            if ($this->env_flag !== Env::PRODUCT) {
-                $eol_str .= str_repeat('-', 100) . PHP_EOL;
-            }
-            $message = $eol_str . LogHelper::logHeader() . $this->split_flag . $message;
+            $message = LogHelper::logHeader() . $this->split_flag . $message;
             $this->log_request_header = false;
         }
         if ($this->is_write_buffer) {

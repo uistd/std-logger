@@ -82,7 +82,7 @@ class LogHelper
                 $log_msg .= ' POST[' . http_build_query($_POST) . ']';
             }
         }
-        return $log_msg;
+        return PHP_EOL . $log_msg;
     }
 
     /**

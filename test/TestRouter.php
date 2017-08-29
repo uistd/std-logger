@@ -25,7 +25,7 @@ class TestRouter extends LogRouter
             return 0;
         }
         $logger = $this->getLogger();
-        $logger->error($log_level, '[' . LogLevel::levelName($log_level) . ']' . $message);
+        $logger->error('[' . LogLevel::levelName($log_level) . ']' . $message);
         return 0;
     }
 
