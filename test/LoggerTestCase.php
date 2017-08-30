@@ -2,9 +2,14 @@
 
 require_once '../vendor/autoload.php';
 require_once 'TestRouter.php';
+
+\ffan\php\utils\Config::init(array(
+    'env' => 'sit'
+));
+
 $logger = \FFan\Std\Logger\LogHelper::getLogger('log');
 
-$router = new TestRouter($logger);
+$router = new \FFan\Std\Logger\Router\ErrorRouter($logger, \FFan\Std\Logger\LogLevel::ALERT);
 
 $logger->debug('debug test');
 

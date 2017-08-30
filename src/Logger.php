@@ -109,7 +109,7 @@ class Logger
         }
         $this->log_level = $log_level;
         //不是开发环境,日志合并写
-        if (!$log_level === Env::DEV) {
+        if (!Env::isDev()) {
             $this->is_write_buffer = true;
         } else {
             //开发环境,日志不切割
