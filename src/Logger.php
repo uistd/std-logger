@@ -2,8 +2,8 @@
 
 namespace FFan\Std\Logger;
 
-use ffan\php\utils\Env;
-use ffan\php\utils\Utils;
+use FFan\Std\Common\Env;
+use FFan\Std\Common\Utils;
 
 /**
  * Class Logger 日志类

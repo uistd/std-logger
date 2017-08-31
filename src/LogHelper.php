@@ -2,7 +2,7 @@
 
 namespace FFan\Std\Logger;
 
-use ffan\php\utils\Ip;
+use FFan\Std\Common\Ip;
 
 /**
  * Class LogHelper
