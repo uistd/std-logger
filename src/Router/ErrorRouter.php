@@ -78,7 +78,7 @@ class ErrorRouter extends LogRouter
     private function getLogger()
     {
         if (null === $this->logger) {
-            $this->logger = new Logger($this->parent->getPath(), 'error');
+            $this->logger = new Logger($this->path, 'error');
         }
         return $this->logger;
     }
