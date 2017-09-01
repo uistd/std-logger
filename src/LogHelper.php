@@ -21,14 +21,9 @@ class LogHelper
     private static $log_header;
 
     /**
-     * @var Logger
+     * @var LogRouter 主路由器
      */
-    private static $main_logger;
-
-    /**
-     * @var Logger[] 日志实例列表
-     */
-    private static $logger_arr;
+    private static $log_router;
 
     /**
      * 变量转字符
@@ -65,15 +60,14 @@ class LogHelper
         if (null !== self::$log_header) {
             return self::$log_header;
         }
-        $time_str = ' [' . strftime('%y/%m/%d %H:%M:%S') . ']';
         if ('cli' === PHP_SAPI) {
-            $log_msg = 'CLI ' . $time_str;
+            $log_msg = 'CLI ';
             if (is_array($_SERVER['argv'])) {
                 $log_msg .= join(' ', $_SERVER['argv']);
             }
         } else {
-            $ip = IP::get();
-            $log_msg = $_SERVER['REQUEST_METHOD'] . ' ' . $ip . $time_str . '"';
+            $ip = IP::getOriginalIp();
+            $log_msg = $_SERVER['REQUEST_METHOD'] . ' ' . $ip . '"';
             if (!empty($_SERVER['REQUEST_URI'])) {
                 $log_msg .= urldecode(urldecode($_SERVER['REQUEST_URI']));
             }
@@ -84,69 +78,19 @@ class LogHelper
                 $log_msg .= ' POST[' . http_build_query($_POST) . ']';
             }
         }
-        return PHP_EOL . $log_msg;
+        $log_msg .= ' ';
+        return $log_msg;
     }
 
     /**
-     * 消息 长度 和 编码判断
-     * @param string $message
-     * @param int $max_length 数量最长长度
+     * 获取日志路由器
+     * @return LogRouter
      */
-    public static function fixMsg(&$message, $max_length = self::MAX_MESSAGE_SIZE)
+    public static function getLogRouter()
     {
-        $msg_len = strlen($message);
-        //长度判断（注意 字符串剪切后新长度 会超过 MAX_MESSAGE_SIZE）
-        if ($msg_len > $max_length) {
-            $new_message = mb_substr($message, 0, $max_length);
-            if (strlen($new_message) < $msg_len) {
-                $new_message .= '...';
-            }
-            $message = $new_message;
+        if (null === self::$log_router) {
+            self::$log_router = new LogRouter();
         }
-        //不是utf编码，直接base64 encode
-        if ('UTF-8' !== mb_detect_encoding($message, 'UTF-8', true)) {
-            $message = base64_encode($message);
-        }
-    }
-
-    /**
-     * 获取实例
-     * @param string $path 路径
-     * @param string $file_name 文件名
-     * @return Logger
-     */
-    public static function getLogger($path, $file_name = 'log')
-    {
-        if (!is_string($path) || !is_string($file_name)) {
-            throw new \InvalidArgumentException('Invalid path or file_name');
-        }
-        $key = $path . '/' . $file_name;
-        if (isset(self::$logger_arr[$key])) {
-            return self::$logger_arr[$key];
-        }
-        $logger = new Logger($path, $file_name);
-        self::$logger_arr[$key] = $logger;
-        return $logger;
-    }
-
-    /**
-     * 获取主日志对象
-     * @return Logger
-     */
-    public static function getMainLogger()
-    {
-        if (null === self::$main_logger) {
-            self::$main_logger = self::getLogger('main');
-        }
-        return self::$main_logger;
-    }
-
-    /**
-     * 设置主日志记录
-     * @param Logger $logger
-     */
-    public static function setMainLogger(Logger $logger)
-    {
-        self::$main_logger = $logger;
+        return self::$log_router;
     }
 }

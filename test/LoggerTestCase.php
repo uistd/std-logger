@@ -1,24 +1,29 @@
 <?php
 
+use FFan\Std\Logger\FileLogger;
+
 require_once '../vendor/autoload.php';
-require_once 'TestRouter.php';
 
 \FFan\Std\Common\Config::init(array(
-    'env' => 'sit'
+    'env' => 'dev'
 ));
 
-$logger = \FFan\Std\Logger\LogHelper::getLogger('log');
-$logger->config(array('split_format' => 'Y'));
-$router = new \FFan\Std\Logger\Router\ErrorRouter($logger, \FFan\Std\Logger\LogLevel::ALERT);
+$logger = new \FFan\Std\Logger\FileLogger();
+$logger->setOption(FileLogger::OPT_LOG_TYPE_STR|FileLogger::OPT_BREAK_EACH_REQUEST);
+$log_router = \FFan\Std\Logger\LogHelper::getLogRouter();
+$log_router->debug('debug test');
 
-$logger->debug('debug test');
+$log_router->info('info test');
+$log_router->info(print_r($_SERVER, true));
 
-$logger->info('info test');
+$log_router->notice('notice test');
 
-$logger->notice('notice test');
+$log_router->warning('warning test');
 
-$logger->warning('warning test');
-$logger->error('error test');
-$logger->critical('critical test');
-$logger->alert('alert test');
-$logger->emergency('emergency test');
+$log_router->error('error test');
+
+$log_router->critical('critical test');
+
+$log_router->alert('alert test');
+
+$log_router->emergency('emergency test');
