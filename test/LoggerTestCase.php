@@ -3,12 +3,12 @@
 require_once '../vendor/autoload.php';
 require_once 'TestRouter.php';
 
-\ffan\php\utils\Config::init(array(
+\FFan\Std\Common\Config::init(array(
     'env' => 'sit'
 ));
 
 $logger = \FFan\Std\Logger\LogHelper::getLogger('log');
-
+$logger->config(array('split_format' => 'Y'));
 $router = new \FFan\Std\Logger\Router\ErrorRouter($logger, \FFan\Std\Logger\LogLevel::ALERT);
 
 $logger->debug('debug test');

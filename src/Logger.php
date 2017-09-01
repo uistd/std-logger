@@ -131,6 +131,10 @@ class Logger
         if (isset($conf['log_file_suffix'])) {
             $this->log_file_suffix = $conf['log_file_suffix'];
         }
+        //日志分割格式化
+        if (isset($conf['split_format'])) {
+            $this->split_format = $conf['split_format'];
+        }
     }
 
     /**
