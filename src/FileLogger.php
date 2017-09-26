@@ -4,6 +4,7 @@ namespace FFan\Std\Logger;
 
 use FFan\Std\Common\Env;
 use FFan\Std\Common\Utils;
+use FFan\Std\Event\EventManager;
 
 /**
  * Class FileLogger 文件日志类
@@ -151,6 +152,7 @@ class FileLogger extends LoggerBase
             $init_opt |= self::OPT_WRITE_BUFFER;
         }
         $this->setOption($init_opt);
+        EventManager::instance()->attach(EventManager::SHUTDOWN_EVENT, [$this, 'saveLog']);
     }
 
     /**
@@ -209,9 +211,9 @@ class FileLogger extends LoggerBase
     }
 
     /**
-     * 析构
+     * 保存日志
      */
-    public function __destruct()
+    public function saveLog()
     {
         if (!empty($this->msg_buffer)) {
             $file_handle = $this->getFileHandle();
