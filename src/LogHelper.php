@@ -67,12 +67,9 @@ class LogHelper
             }
         } else {
             $ip = IP::getOriginalIp();
-            $log_msg = $_SERVER['REQUEST_METHOD'] . ' ' . $ip . '"';
+            $log_msg = $_SERVER['REQUEST_METHOD'] . ' ' . $ip . ' "';
             if (!empty($_SERVER['REQUEST_URI'])) {
                 $log_msg .= urldecode(urldecode($_SERVER['REQUEST_URI']));
-            }
-            if (isset($_SERVER['HTTP_COOKIE'])) {
-                $log_msg .= '" COOKIE[' . $_SERVER['HTTP_COOKIE'] . ']';
             }
             if (!empty($_POST)) {
                 $log_msg .= ' POST[' . http_build_query($_POST) . ']';
