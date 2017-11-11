@@ -3,6 +3,7 @@
 namespace FFan\Std\Logger;
 
 use FFan\Std\Common\Ip;
+use FFan\Std\Common\Utils;
 
 /**
  * Class LogHelper
@@ -71,8 +72,11 @@ class LogHelper
             if (!empty($_SERVER['REQUEST_URI'])) {
                 $log_msg .= urldecode(urldecode($_SERVER['REQUEST_URI']));
             }
-            if (!empty($_POST)) {
-                $log_msg .= ' POST[' . http_build_query($_POST) . ']';
+            //如果 是post请求, 打印一部分数据
+            if ('POST' === Utils::getHttpMethod()) {
+                //防止日志量太大, 记录一小部分 post数据
+                $post_data = mb_substr(file_get_contents('php://input'), 0, 2048);
+                $log_msg .= ' POST[' . urldecode(urldecode($post_data)) . ']';
             }
         }
         $log_msg .= ' ';

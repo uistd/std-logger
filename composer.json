@@ -15,7 +15,8 @@
   ],
   "require": {
     "php": ">=5.5.0",
-    "ffan/std-common": "2.*"
+    "ffan/std-common": "2.*",
+    "ffan/std-event": "2.*"
   },
   "autoload": {
     "psr-4": {
