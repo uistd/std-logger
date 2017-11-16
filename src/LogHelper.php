@@ -67,7 +67,7 @@ class LogHelper
                 $log_msg .= join(' ', $_SERVER['argv']);
             }
         } else {
-            $ip = IP::getOriginalIp();
+            $ip = IP::get();
             $log_msg = $_SERVER['REQUEST_METHOD'] . ' ' . $ip . ' "';
             if (!empty($_SERVER['REQUEST_URI'])) {
                 $log_msg .= urldecode(urldecode($_SERVER['REQUEST_URI']));
