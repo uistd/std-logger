@@ -121,8 +121,9 @@ class FileLogger extends LoggerBase
      * @param string $path 目录（默认在 runtime目录的logs下）
      * @param string $file_name 文件名
      * @param int $log_level
+     * @param int $option 初始参数
      */
-    public function __construct($path = 'logs', $file_name = 'log', $log_level = null)
+    public function __construct($path = 'logs', $file_name = 'log', $log_level = null, $option = 0)
     {
         parent::__construct();
         $this->file_name = $file_name;
@@ -140,18 +141,20 @@ class FileLogger extends LoggerBase
             $log_level = 0xffff;
         }
         $this->log_level = $log_level;
-        //默认参数
-        $init_opt = self::OPT_LOG_HEADER | self::OPT_BREAK_EACH_LOG;
-        $env = Env::getEnv();
-        //生产环境，日志按小时分割
-        if (Env::PRODUCT === $env) {
-            $init_opt |= self::OPT_SPLIT_BY_HOUR;
-            $init_opt |= self::OPT_WRITE_BUFFER;
-        } elseif (Env::SIT === $env || Env::UAT === $env) {
-            $init_opt |= self::OPT_SPLIT_BY_DAY;
-            $init_opt |= self::OPT_WRITE_BUFFER;
+        if (0 === $option) {
+            //默认参数
+            $option = self::OPT_LOG_HEADER | self::OPT_BREAK_EACH_LOG;
+            $env = Env::getEnv();
+            //生产环境，日志按小时分割
+            if (Env::PRODUCT === $env) {
+                $option |= self::OPT_SPLIT_BY_HOUR;
+                $option |= self::OPT_WRITE_BUFFER;
+            } elseif (Env::SIT === $env || Env::UAT === $env) {
+                $option |= self::OPT_SPLIT_BY_DAY;
+                $option |= self::OPT_WRITE_BUFFER;
+            }
         }
-        $this->setOption($init_opt);
+        $this->setOption($option);
         EventManager::instance()->attach(EventManager::SHUTDOWN_EVENT, [$this, 'saveLog']);
     }
 
