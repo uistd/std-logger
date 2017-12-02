@@ -27,3 +27,5 @@ $log_router->critical('critical test');
 $log_router->alert('alert test');
 
 $log_router->emergency('emergency test');
+
+$logger->remove();

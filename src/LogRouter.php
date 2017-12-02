@@ -49,6 +49,19 @@ class LogRouter
     }
 
     /**
+     * 移除日志对象
+     * @param LoggerBase $logger
+     */
+    public function removeLogger(LoggerBase $logger)
+    {
+        foreach ($this->logger_list as $i => $each_logger) {
+            if ($logger === $each_logger) {
+                unset($this->logger_list[$i]);
+            }
+        }
+    }
+
+    /**
      * 记录日志
      * @param int $level 日志级别
      * @param string $message 日志消息主体

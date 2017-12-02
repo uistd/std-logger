@@ -14,6 +14,23 @@ abstract class LoggerBase
     }
 
     /**
+     * 析构
+     */
+    public function __debugInfo()
+    {
+        $this->remove();
+    }
+
+    /**
+     * 移除
+     */
+    public function remove()
+    {
+        $router = LogHelper::getLogRouter();
+        $router->removeLogger($this);
+    }
+
+    /**
      * 收到日志
      * @param int $log_level
      * @param string $content
