@@ -159,6 +159,14 @@ class FileLogger extends LoggerBase
     }
 
     /**
+     * 析构时关闭文件
+     */
+    public function __destruct()
+    {
+        $this->close();
+    }
+
+    /**
      * 设置日志参数
      * @param array $conf
      */
@@ -218,16 +226,13 @@ class FileLogger extends LoggerBase
      */
     public function saveLog()
     {
-        if (!empty($this->msg_buffer)) {
-            $file_handle = $this->getFileHandle();
-            if (null !== $file_handle) {
-                fwrite($file_handle, join($this->break_flag, $this->msg_buffer) . $this->break_flag);
-            }
+        if (empty($this->msg_buffer)) {
+            return;
         }
-        if ($this->file_handle) {
-            fwrite($this->file_handle, PHP_EOL);
+        $file_handle = $this->getFileHandle();
+        if (null !== $file_handle) {
+            fwrite($file_handle, join($this->break_flag, $this->msg_buffer) . PHP_EOL);
         }
-        $this->close();
     }
 
     /**
@@ -308,11 +313,6 @@ class FileLogger extends LoggerBase
             $prefix_str = '[' . LogLevel::levelName($log_level) . ']';
         }
 
-        //如果 每次请求内不换行 把换行符替换成
-        if (($this->current_opt & self::OPT_BREAK_EACH_REQUEST) > 0) {
-            $content = str_replace(PHP_EOL, '\\n', $content);
-        }
-
         //第一条日志强制换行
         if ($this->is_first_log) {
             if (($this->current_opt & self::OPT_LOG_HEADER) > 0) {
@@ -322,10 +322,15 @@ class FileLogger extends LoggerBase
             $this->is_first_log = false;
             $prefix_str = PHP_EOL . $time_str . $this->break_flag . $prefix_str;
         }
-
         if (!empty($prefix_str)) {
             $content = $prefix_str . $content;
         }
+
+        //如果 每次请求内不换行 把换行符替换成
+        if (($this->current_opt & self::OPT_BREAK_EACH_REQUEST) > 0) {
+            $content = str_replace(PHP_EOL, '\\n', $content);
+        }
+
         if ($this->is_write_buffer) {
             $this->msg_buffer[] = $content;
         } else {
