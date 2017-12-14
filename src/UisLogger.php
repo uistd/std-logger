@@ -2,12 +2,19 @@
 
 namespace FFan\Std\Logger;
 
+use FFan\Std\Common\Env;
+
 /**
  * Class UisLogger
  * @package FFan\Std\Logger
  */
 class UisLogger extends LoggerBase
 {
+    /**
+     * 最大只支持65535长度的字符串 暂时写死!
+     */
+    const MAX_LENGTH = 65535;
+
     /**
      * @var array
      */
@@ -73,7 +80,17 @@ class UisLogger extends LoggerBase
         }
         $fd_handler = $this->getLogHandler();
         if (is_resource($fd_handler)) {
-            $content = $this->packLog(join($this->break_flag, $this->msg_buffer) . PHP_EOL);
+            $content = join($this->break_flag, $this->msg_buffer) . PHP_EOL;
+            //如果日志大于 最大单条日志, 并且不是生产环境, 切割日志
+            //调试环境下, 经常有日志超过64K的情况
+            if (strlen($content) > self::MAX_LENGTH && !Env::isProduct()) {
+                $content = '';
+                foreach ($this->msg_buffer as $each_log) {
+                    $content .= $this->packLog($each_log . $this->break_flag);
+                }
+            } else {
+                $content = $this->packLog($content);
+            }
             $total_len = strlen($content);
             while ($total_len > 0) {
                 $re = fwrite($fd_handler, $content, $total_len);
@@ -201,14 +218,12 @@ class UisLogger extends LoggerBase
     private function packLog($content)
     {
         $content_len = strlen($content);
-        //最大只支持65535长度的字符串 暂时写死!
-        $max_length = 0xffff;
         //如果超最大支持长度, 需要做内容切割
-        if ($content_len >= $max_length) {
+        if ($content_len > self::MAX_LENGTH) {
             $fix_str = '[too long]';
             $cut_buffer_len = 8;
             //后面的 8 是用于字符串 切割时, 不要出现乱码, utf_8 最大长度是8
-            $max_length -= (strlen($fix_str) + $cut_buffer_len);
+            $max_length = self::MAX_LENGTH - strlen($fix_str) - $cut_buffer_len;
             $new_content = substr($content, 0, $max_length);
             $cut_buffer = substr($content, $max_length, $cut_buffer_len);
             //再从cut_buffer 中 切割 出一个完整的字符串
