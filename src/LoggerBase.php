@@ -72,7 +72,7 @@ abstract class LoggerBase
      * @param int $option 内容参数
      * @param mixed $ext_config
      */
-    public function __construct($file_name, $log_level = null, $option = 0, $ext_config = null)
+    public function __construct($file_name = '', $log_level = null, $option = 0, $ext_config = null)
     {
         $this->ext_config = $ext_config;
         $this->file_name = $file_name;
