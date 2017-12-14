@@ -47,9 +47,8 @@ class UisLogger extends LoggerBase
      */
     public function __construct($file_name = 'log', $log_level = 0, $option = 0, $ext_conf = [])
     {
-        parent::__construct($file_name = 'log', $log_level, $option, $ext_conf);
+        parent::__construct($file_name, $log_level, $option, $ext_conf);
         $this->file_name = $file_name;
-        $this->setOption($option);
         $this->parseConfig($ext_conf);
     }
 
@@ -74,7 +73,7 @@ class UisLogger extends LoggerBase
         }
         $fd_handler = $this->getLogHandler();
         if (is_resource($fd_handler)) {
-            $content = $this->packLog(join($this->break_flag, $this->msg_buffer));
+            $content = $this->packLog(join($this->break_flag, $this->msg_buffer) . PHP_EOL);
             $total_len = strlen($content);
             while ($total_len > 0) {
                 $re = fwrite($fd_handler, $content, $total_len);
@@ -165,11 +164,6 @@ class UisLogger extends LoggerBase
             $prefix_str = '[' . LogLevel::levelName($log_level) . ']';
         }
 
-        //如果 每次请求内不换行 把换行符替换成
-        if (($this->current_opt & self::OPT_BREAK_EACH_REQUEST) > 0) {
-            $content = str_replace(PHP_EOL, '\\n', $content);
-        }
-
         //第一条日志强制换行
         if ($this->is_first_log) {
             if (($this->current_opt & self::OPT_LOG_HEADER) > 0) {
@@ -179,13 +173,19 @@ class UisLogger extends LoggerBase
             $this->is_first_log = false;
             $prefix_str = PHP_EOL . $time_str . $this->break_flag . $prefix_str;
         }
+
         if (!empty($prefix_str)) {
             $content = $prefix_str . $content;
+        }
+
+        //如果 每次请求内不换行 把换行符替换成
+        if (($this->current_opt & self::OPT_BREAK_EACH_REQUEST) > 0) {
+            $content = str_replace(PHP_EOL, '\\n', $content);
         }
         if ($this->is_write_buffer) {
             $this->msg_buffer[] = $content;
         } else {
-            $content = $this->packLog($content);
+            $content = $this->packLog($content . PHP_EOL);
             $re = fwrite($fd_handler, $content, strlen($content));
             if (false === $re) {
                 $this->setDisable();
