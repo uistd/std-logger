@@ -85,7 +85,7 @@ abstract class LoggerBase
         $this->log_level = $log_level;
         if (0 === $option) {
             //默认参数
-            $option = self::OPT_LOG_HEADER | self::OPT_BREAK_EACH_LOG;
+            $option = self::OPT_LOG_HEADER | self::OPT_BREAK_EACH_LOG | self::OPT_LOG_TYPE_STR;
             $env = Env::getEnv();
             //生产环境，日志按小时分割
             if (Env::PRODUCT === $env) {
