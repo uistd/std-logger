@@ -113,7 +113,7 @@ class UisLogger extends LoggerBase
         if (is_resource($fd_handler)) {
             $content = $this->packLog(join($this->break_flag, $this->msg_buffer));
             $total_len = strlen($content);
-            while($total_len > 0) {
+            while ($total_len > 0) {
                 $re = fwrite($fd_handler, $content, $total_len);
                 if (false === $re || $re <= 0) {
                     $this->setDisable();
@@ -183,6 +183,7 @@ class UisLogger extends LoggerBase
             return null;
         }
         stream_set_blocking($this->fd_handler, false);
+        $this->is_write_buffer = false;
         return $this->fd_handler;
     }
 
@@ -260,14 +261,26 @@ class UisLogger extends LoggerBase
      */
     private function packLog($content)
     {
-        $data = array(
-            'file' => $this->file_name,
-            'content' => $content . PHP_EOL
-        );
+        $content_len = strlen($content);
+        //最大只支持65535长度的字符串 暂时写死!
+        $max_length = 0xffff;
+        //如果超最大支持长度, 需要做内容切割
+        if ($content_len >= $max_length) {
+            $fix_str = '[too long]';
+            $cut_buffer_len = 8;
+            //后面的 8 是用于字符串 切割时, 不要出现乱码, utf_8 最大长度是8
+            $max_length -= (strlen($fix_str) + $cut_buffer_len);
+            $new_content = substr($content, 0, $max_length);
+            $cut_buffer = substr($content, $max_length, $cut_buffer_len);
+            //再从cut_buffer 中 切割 出一个完整的字符串
+            $cut_buffer = mb_substr($cut_buffer, 0, 1);
+            $content = $new_content . $cut_buffer . $fix_str;
+            $content_len = strlen($content);
+            echo "too long,", $content_len, PHP_EOL;
+        }
         $bin_str = '';
-        $vfile_len = strlen($data['file']);
-        $vcontent_len = strlen($data['content']);
-        $bin_str .= pack('Sa' . $vfile_len . 'Sa' . $vcontent_len . '', $vfile_len, $data['file'], $vcontent_len, $data['content']);
+        $file_len = strlen($this->file_name);
+        $bin_str .= pack('Sa' . $file_len . 'Sa' . $content_len . '', $file_len, $this->file_name, $content_len, $content);
         $head_str = pack("LS", strlen($bin_str), 100);
         $bin_str = $head_str . $bin_str;
         return $bin_str;
