@@ -2,9 +2,7 @@
 
 namespace FFan\Std\Logger;
 
-use FFan\Std\Common\Config;
 use FFan\Std\Common\InvalidConfigException;
-use FFan\Std\Common\Utils;
 use FFan\Std\Event\EventManager;
 
 /**
@@ -79,19 +77,25 @@ class UisLogger extends LoggerBase
     private $fd_handler;
 
     /**
+     * @var string
+     */
+    private $host;
+
+    /**
      * UisLogClient constructor.
-     * @param string $path 目录
+     * @param string $host
      * @param string $file_name 文件名
      * @param int $log_level
      * @param int $option
      */
-    public function __construct($path, $file_name = 'log', $log_level = 0, $option = 0)
+    public function __construct($host, $file_name = 'log', $log_level = 0, $option = 0)
     {
         parent::__construct();
+        $this->host = $host;
         if ($log_level <= 0) {
             $log_level = 0xffff;
         }
-        $this->file_name = Utils::joinFilePath($path, $file_name);
+        $this->file_name = $file_name;
         $this->log_level = $log_level;
         if (0 === $option) {
             //默认参数
@@ -168,14 +172,9 @@ class UisLogger extends LoggerBase
         if (null !== $this->fd_handler) {
             return $this->fd_handler;
         }
-        $config = Config::get('uis_log_server');
-        if (!isset($config['host'])) {
-            throw new InvalidConfigException('CONFIG `uis_log_server` required');
-        }
-        $host = $config['host'];
-        $port = isset($config['port']) ? $config['port'] : 10666;
+
         $opt = STREAM_CLIENT_CONNECT | STREAM_CLIENT_PERSISTENT;
-        $this->fd_handler = stream_socket_client('tcp://' . $host . ':' . $port, $err_no, $err_msg, 1, $opt);
+        $this->fd_handler = stream_socket_client($this->host, $err_no, $err_msg, 1, $opt);
         //如果无法连接服务器, 设置系统不可用
         if (!$this->fd_handler) {
             $this->setDisable();

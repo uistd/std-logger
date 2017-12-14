@@ -7,15 +7,12 @@ use FFan\Std\Logger\UisLogger;
 require_once '../vendor/autoload.php';
 
 Config::init(array(
-    'env' => 'dev',
-    'uis_log_server' => array(
-        'host' => '127.0.0.1'
-    )
+    'env' => 'dev'
 ));
 
 $all_logger = array();
 for ($i = 0; $i < 1; ++$i) {
-    $logger = new UisLogger('test_' . $i, 'log');
+    $logger = new UisLogger('tcp://127.0.0.1:10666', 'test_' . $i, 'log');
     $log_router = LogHelper::getLogRouter();
     $log_router->debug('debug test' . str_repeat("this is debug string " . $i, 100) . " end");
 
