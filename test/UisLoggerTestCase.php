@@ -12,7 +12,7 @@ Config::init(array(
 
 $all_logger = array();
 for ($i = 0; $i < 1; ++$i) {
-    $logger = new UisLogger('tcp://127.0.0.1:10666', 'test_' . $i, 'log');
+    $logger = new UisLogger('test_' . $i . '/log', null, 0);
     $log_router = LogHelper::getLogRouter();
     $log_router->debug('debug test' . str_repeat("this is debug string " . $i, 100) . " end");
 

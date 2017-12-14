@@ -2,9 +2,7 @@
 
 namespace FFan\Std\Logger;
 
-use FFan\Std\Common\Env;
 use FFan\Std\Common\Utils;
-use FFan\Std\Event\EventManager;
 
 /**
  * Class FileLogger 文件日志类
@@ -12,45 +10,6 @@ use FFan\Std\Event\EventManager;
  */
 class FileLogger extends LoggerBase
 {
-    /**
-     * 是否记录请求头
-     */
-    const OPT_LOG_HEADER = 1;
-
-    /**
-     * 是否将日志写入buffer，然后一次性写入文件
-     */
-    const OPT_WRITE_BUFFER = 2;
-
-    /**
-     * 是否记录日志类型
-     */
-    const OPT_LOG_TYPE_STR = 4;
-    /**
-     * 按天分隔
-     */
-    const OPT_SPLIT_BY_DAY = 8;
-
-    /**
-     * 按小时分隔
-     */
-    const OPT_SPLIT_BY_HOUR = 16;
-
-    /**
-     * 每一条日志换行
-     */
-    const OPT_BREAK_EACH_LOG = 32;
-
-    /**
-     * 第一个请求换一次行
-     */
-    const OPT_BREAK_EACH_REQUEST = 64;
-
-    /**
-     * @var string 文件名
-     */
-    private $file_name;
-
     /**
      * @var string 分隔格式
      */
@@ -82,11 +41,6 @@ class FileLogger extends LoggerBase
     private $log_path;
 
     /**
-     * @var bool 日志级别
-     */
-    private $log_level;
-
-    /**
      * @var array 未写入的消息
      */
     private $msg_buffer;
@@ -102,11 +56,6 @@ class FileLogger extends LoggerBase
     private $log_file_suffix = 'log';
 
     /**
-     * @var int 当前生效的option
-     */
-    private $current_opt = 0;
-
-    /**
      * @var bool 是否是第一条日志
      */
     private $is_first_log = true;
@@ -118,16 +67,15 @@ class FileLogger extends LoggerBase
 
     /**
      * constructor.
-     * @param string $path 目录（默认在 runtime目录的logs下）
      * @param string $file_name 文件名
      * @param int $log_level
      * @param int $option 初始参数
      */
-    public function __construct($path = 'logs', $file_name = 'log', $log_level = null, $option = 0)
+    public function __construct($file_name = 'log', $log_level = null, $option = 0)
     {
-        parent::__construct();
-        $this->file_name = $file_name;
-        $this->log_path = Utils::fixWithRuntimePath($path);
+        parent::__construct($file_name, $log_level, $option);
+        $this->log_path = dirname(Utils::fixWithRuntimePath($file_name));
+        $this->file_name = basename($file_name);
         //目录不存在，无法创建
         if (!is_dir($this->log_path) && !mkdir($this->log_path, 0755, true)) {
             $this->is_disable = true;
@@ -136,34 +84,6 @@ class FileLogger extends LoggerBase
         if (!$this->is_disable && !is_writeable($this->log_path)) {
             $this->is_disable = true;
         }
-        //如果没有设置日志级别,全开
-        if (null === $log_level) {
-            $log_level = 0xffff;
-        }
-        $this->log_level = $log_level;
-        if (0 === $option) {
-            //默认参数
-            $option = self::OPT_LOG_HEADER | self::OPT_BREAK_EACH_LOG;
-            $env = Env::getEnv();
-            //生产环境，日志按小时分割
-            if (Env::PRODUCT === $env) {
-                $option |= self::OPT_SPLIT_BY_HOUR;
-                $option |= self::OPT_WRITE_BUFFER;
-            } elseif (Env::SIT === $env || Env::UAT === $env) {
-                $option |= self::OPT_SPLIT_BY_DAY;
-                $option |= self::OPT_WRITE_BUFFER;
-            }
-        }
-        $this->setOption($option);
-        EventManager::instance()->attach(EventManager::SHUTDOWN_EVENT, [$this, 'saveLog']);
-    }
-
-    /**
-     * 析构时关闭文件
-     */
-    public function __destruct()
-    {
-        $this->close();
     }
 
     /**
@@ -183,26 +103,9 @@ class FileLogger extends LoggerBase
     }
 
     /**
-     * 设置option
-     * @param int $append_option
-     * @param int $remove_option
-     * @internal param int $option
-     */
-    public function setOption($append_option = 0, $remove_option = 0)
-    {
-        if ($append_option > 0) {
-            $this->current_opt |= $append_option;
-        }
-        if ($remove_option > 0) {
-            $this->current_opt ^= $remove_option;
-        }
-        $this->parseOption();
-    }
-
-    /**
      * 解析设置
      */
-    private function parseOption()
+    protected function parseOption()
     {
         $opt = $this->current_opt;
         $this->is_write_buffer = ($opt & self::OPT_WRITE_BUFFER) > 0;
@@ -222,9 +125,9 @@ class FileLogger extends LoggerBase
     }
 
     /**
-     * 保存日志
+     * 保存在缓存中日志
      */
-    public function saveLog()
+    public function flushLogBuffer()
     {
         if (empty($this->msg_buffer)) {
             return;

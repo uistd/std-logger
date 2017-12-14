@@ -2,50 +2,12 @@
 
 namespace FFan\Std\Logger;
 
-use FFan\Std\Common\InvalidConfigException;
-use FFan\Std\Event\EventManager;
-
 /**
  * Class UisLogger
  * @package FFan\Std\Logger
  */
 class UisLogger extends LoggerBase
 {
-    /**
-     * 是否记录请求头
-     */
-    const OPT_LOG_HEADER = 1;
-
-    /**
-     * 是否将日志写入buffer，然后一次性写入文件
-     */
-    const OPT_WRITE_BUFFER = 2;
-
-    /**
-     * 是否记录日志类型
-     */
-    const OPT_LOG_TYPE_STR = 4;
-
-    /**
-     * 每一条日志换行
-     */
-    const OPT_BREAK_EACH_LOG = 8;
-
-    /**
-     * 第一个请求换一次行
-     */
-    const OPT_BREAK_EACH_REQUEST = 16;
-
-    /**
-     * @var int 日志级别
-     */
-    private $log_level;
-
-    /**
-     * @var string 文件名
-     */
-    private $file_name;
-
     /**
      * @var array
      */
@@ -55,11 +17,6 @@ class UisLogger extends LoggerBase
      * @var bool
      */
     private $is_first_log = true;
-
-    /**
-     * @var int 选项
-     */
-    private $current_opt;
 
     /**
      * @var string
@@ -77,38 +34,40 @@ class UisLogger extends LoggerBase
     private $fd_handler;
 
     /**
-     * @var string
+     * @var string 日志服务器
      */
     private $host;
 
     /**
      * UisLogClient constructor.
-     * @param string $host
      * @param string $file_name 文件名
      * @param int $log_level
      * @param int $option
+     * @param array $ext_conf
      */
-    public function __construct($host, $file_name = 'log', $log_level = 0, $option = 0)
+    public function __construct($file_name = 'log', $log_level = 0, $option = 0, $ext_conf = [])
     {
-        parent::__construct();
-        $this->host = $host;
-        if ($log_level <= 0) {
-            $log_level = 0xffff;
-        }
+        parent::__construct($file_name = 'log', $log_level, $option, $ext_conf);
         $this->file_name = $file_name;
-        $this->log_level = $log_level;
-        if (0 === $option) {
-            //默认参数
-            $option = self::OPT_LOG_HEADER | self::OPT_BREAK_EACH_LOG | self::OPT_WRITE_BUFFER | self::OPT_LOG_TYPE_STR;
-        }
         $this->setOption($option);
-        EventManager::instance()->attach(EventManager::SHUTDOWN_EVENT, [$this, 'saveLog']);
+        $this->parseConfig($ext_conf);
     }
 
     /**
-     * 保存日志
+     * 解析配置文件
+     * @param array $ext_conf
      */
-    public function saveLog()
+    private function parseConfig($ext_conf)
+    {
+        $host = isset($ext_conf['host']) ? $ext_conf['host'] : '127.0.0.1';
+        $port = isset($ext_conf['port']) ? $ext_conf['port'] : 10666;
+        $this->host = 'tcp://' . $host . ':' . $port;
+    }
+
+    /**
+     * 保存缓存中的日志
+     */
+    public function flushLogBuffer()
     {
         if (empty($this->msg_buffer)) {
             return;
@@ -132,26 +91,9 @@ class UisLogger extends LoggerBase
     }
 
     /**
-     * 设置option
-     * @param int $append_option
-     * @param int $remove_option
-     * @internal param int $option
-     */
-    public function setOption($append_option = 0, $remove_option = 0)
-    {
-        if ($append_option > 0) {
-            $this->current_opt |= $append_option;
-        }
-        if ($remove_option > 0) {
-            $this->current_opt ^= $remove_option;
-        }
-        $this->parseOption();
-    }
-
-    /**
      * 解析设置
      */
-    private function parseOption()
+    protected function parseOption()
     {
         $opt = $this->current_opt;
         $this->is_write_buffer = ($opt & self::OPT_WRITE_BUFFER) > 0;
@@ -165,7 +107,6 @@ class UisLogger extends LoggerBase
     /**
      * 获取连接
      * @return resource
-     * @throws InvalidConfigException
      */
     private function getLogHandler()
     {
@@ -182,7 +123,6 @@ class UisLogger extends LoggerBase
             return null;
         }
         stream_set_blocking($this->fd_handler, false);
-        $this->is_write_buffer = false;
         return $this->fd_handler;
     }
 
@@ -275,7 +215,6 @@ class UisLogger extends LoggerBase
             $cut_buffer = mb_substr($cut_buffer, 0, 1);
             $content = $new_content . $cut_buffer . $fix_str;
             $content_len = strlen($content);
-            echo "too long,", $content_len, PHP_EOL;
         }
         $bin_str = '';
         $file_len = strlen($this->file_name);

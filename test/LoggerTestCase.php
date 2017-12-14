@@ -28,4 +28,6 @@ $log_router->alert('alert test');
 
 $log_router->emergency('emergency test');
 
+$log_router->notice("This \n is \n break \n log");
+
 $logger->remove();
