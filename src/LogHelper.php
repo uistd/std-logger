@@ -54,9 +54,10 @@ class LogHelper
 
     /**
      * 日志头信息
+     * @param bool $log_post_data 是否记录POST的数据
      * @return string
      */
-    public static function logHeader()
+    public static function logHeader($log_post_data = false)
     {
         if (null !== self::$log_header) {
             return self::$log_header;
@@ -73,9 +74,9 @@ class LogHelper
                 $log_msg .= urldecode(urldecode($_SERVER['REQUEST_URI']));
             }
             //如果 是post请求, 打印一部分数据
-            if ('POST' === Utils::getHttpMethod()) {
-                //防止日志量太大, 记录一小部分 post数据
-                $post_data = mb_substr(file_get_contents('php://input'), 0, 2048);
+            if ($log_post_data && 'POST' === Utils::getHttpMethod()) {
+                //防止日志量太大, 记录一部分 post数据
+                $post_data = mb_substr(file_get_contents('php://input'), 0, 20480);
                 $log_msg .= ' POST[' . urldecode(urldecode($post_data)) . ']';
             }
         }
