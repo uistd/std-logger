@@ -1,16 +1,16 @@
 <?php
 
-use FFan\Std\Logger\FileLogger;
+use UiStd\Logger\FileLogger;
 
 require_once '../vendor/autoload.php';
 
-\FFan\Std\Common\Config::init(array(
+\UiStd\Common\Config::init(array(
     'env' => 'dev'
 ));
 
-$logger = new \FFan\Std\Logger\FileLogger();
+$logger = new \UiStd\Logger\FileLogger();
 $logger->setOption(FileLogger::OPT_LOG_TYPE_STR|FileLogger::OPT_BREAK_EACH_REQUEST);
-$log_router = \FFan\Std\Logger\LogHelper::getLogRouter();
+$log_router = \UiStd\Logger\LogHelper::getLogRouter();
 $log_router->debug('debug test');
 
 $log_router->info('info test');

@@ -1,13 +1,13 @@
 <?php
 
-namespace FFan\Std\Logger;
+namespace UiStd\Logger;
 
-use FFan\Std\Common\Env;
-use FFan\Std\Event\EventManager;
+use UiStd\Common\Env;
+use UiStd\Event\EventManager;
 
 /**
  * Class LoggerBase
- * @package FFan\Std\Logger
+ * @package UiStd\Logger
  */
 abstract class LoggerBase
 {

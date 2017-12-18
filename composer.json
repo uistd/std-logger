@@ -1,8 +1,9 @@
 {
-  "name": "ffan/std-logger",
-  "description": "FFan STD Logger",
+  "name": "uistd/logger",
+  "description": "UI Service 框架日志组件",
   "keywords": [
-    "ffan",
+    "ui service",
+    "uistd",
     "logger"
   ],
   "type": "composer",
@@ -15,12 +16,12 @@
   ],
   "require": {
     "php": ">=5.5.0",
-    "ffan/std-common": "2.*",
-    "ffan/std-event": "2.*"
+    "uistd/common": "3.*",
+    "uistd/event": "3.*"
   },
   "autoload": {
     "psr-4": {
-      "FFan\\Std\\Logger\\" : "src"
+      "UiStd\\Logger\\" : "src"
     }
   },
   "minimum-stability": "stable",

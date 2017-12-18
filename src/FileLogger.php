@@ -1,12 +1,12 @@
 <?php
 
-namespace FFan\Std\Logger;
+namespace UiStd\Logger;
 
-use FFan\Std\Common\Utils;
+use UiStd\Common\Utils;
 
 /**
  * Class FileLogger 文件日志类
- * @package FFan\Std\Logger
+ * @package UiStd\Logger
  */
 class FileLogger extends LoggerBase
 {

@@ -1,10 +1,10 @@
 <?php
 
-namespace FFan\Std\Logger;
+namespace UiStd\Logger;
 
 /**
  * Class LogLevel 日志级别
- * @package FFan\Std\Logger
+ * @package UiStd\Logger
  */
 class LogLevel
 {

@@ -1,8 +1,8 @@
 <?php
 
-use FFan\Std\Common\Config;
-use FFan\Std\Logger\LogHelper;
-use FFan\Std\Logger\UisLogger;
+use UiStd\Common\Config;
+use UiStd\Logger\LogHelper;
+use UiStd\Logger\UisLogger;
 
 require_once '../vendor/autoload.php';
 

@@ -1,12 +1,12 @@
 <?php
 
-namespace FFan\Std\Logger;
+namespace UiStd\Logger;
 
-use FFan\Std\Common\Env;
+use UiStd\Common\Env;
 
 /**
  * Class UisLogger
- * @package FFan\Std\Logger
+ * @package UiStd\Logger
  */
 class UisLogger extends LoggerBase
 {

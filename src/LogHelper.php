@@ -1,13 +1,13 @@
 <?php
 
-namespace FFan\Std\Logger;
+namespace UiStd\Logger;
 
-use FFan\Std\Common\Ip;
-use FFan\Std\Common\Utils;
+use UiStd\Common\Ip;
+use UiStd\Common\Utils;
 
 /**
  * Class LogHelper
- * @package FFan\Std\Logger
+ * @package UiStd\Logger
  */
 class LogHelper
 {

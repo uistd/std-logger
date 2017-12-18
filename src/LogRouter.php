@@ -1,10 +1,10 @@
 <?php
 
-namespace FFan\Std\Logger;
+namespace UiStd\Logger;
 
 /**
  * Class LogRouter 日志路由器
- * @package FFan\Std\Logger
+ * @package UiStd\Logger
  */
 class LogRouter
 {
