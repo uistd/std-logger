@@ -216,14 +216,13 @@ class FileLogger extends LoggerBase
             $prefix_str = '[' . LogLevel::levelName($log_level) . ']';
         }
 
-        //第一条日志强制换行
         if ($this->is_first_log) {
             if (($this->current_opt & self::OPT_LOG_HEADER) > 0) {
                 $prefix_str .= LogHelper::logHeader();
             }
             $time_str = '[' . strftime('%H:%M:%S') . ']';
             $this->is_first_log = false;
-            $prefix_str = PHP_EOL . $time_str . $this->break_flag . $prefix_str;
+            $prefix_str = $time_str . $this->break_flag . $prefix_str;
         }
         if (!empty($prefix_str)) {
             $content = $prefix_str . $content;

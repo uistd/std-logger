@@ -2,6 +2,7 @@
 
 namespace UiStd\Logger;
 
+use UiStd\Common\Config;
 use UiStd\Common\Ip;
 use UiStd\Common\Utils;
 
@@ -54,10 +55,10 @@ class LogHelper
 
     /**
      * 日志头信息
-     * @param bool $log_post_data 是否记录POST的数据
+     * @param null|int $log_post_size 记录post数据的长度
      * @return string
      */
-    public static function logHeader($log_post_data = false)
+    public static function logHeader($log_post_size = null)
     {
         if (null !== self::$log_header) {
             return self::$log_header;
@@ -74,10 +75,15 @@ class LogHelper
                 $log_msg .= urldecode(urldecode($_SERVER['REQUEST_URI']));
             }
             //如果 是post请求, 打印一部分数据
-            if ($log_post_data && 'POST' === Utils::getHttpMethod()) {
-                //防止日志量太大, 记录一部分 post数据
-                $post_data = mb_substr(file_get_contents('php://input'), 0, 20480);
-                $log_msg .= ' POST[' . urldecode(urldecode($post_data)) . ']';
+            if ('POST' === Utils::getHttpMethod()) {
+                if (null === $log_post_size) {
+                    $logger_conf = Config::get('uis-logger');
+                    $log_post_size = isset($logger_conf['log_post_size']) ? (int)$logger_conf['log_post_size'] : 0;
+                }
+                if ($log_post_size > 0) {
+                    $post_data = mb_substr(file_get_contents('php://input'), 0, $log_post_size);
+                    $log_msg .= ' POST[' . urldecode(urldecode($post_data)) . ']';
+                }
             }
         }
         $log_msg .= ' ';

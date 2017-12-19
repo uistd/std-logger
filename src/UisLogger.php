@@ -188,7 +188,7 @@ class UisLogger extends LoggerBase
             }
             $time_str = '[' . strftime('%H:%M:%S') . ']';
             $this->is_first_log = false;
-            $prefix_str = PHP_EOL . $time_str . $this->break_flag . $prefix_str;
+            $prefix_str = $time_str . $this->break_flag . $prefix_str;
         }
 
         if (!empty($prefix_str)) {
